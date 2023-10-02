@@ -1,7 +1,8 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import Col from 'react-bootstrap/esm/Col'
 import Container from 'react-bootstrap/esm/Container'
 import Row from 'react-bootstrap/Row'
+import Spinner from 'react-bootstrap/Spinner'
 import TypeBar from '../components/TypeBar'
 import BrandBar from '../components/BrandBar'
 import DeviceList from '../components/DeviceList'
@@ -12,6 +13,7 @@ import Pages from '../components/Pages'
 
 const Shop = observer(() => {
   const { device } = useStore()
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     fetchBrands().then((data) => device.setBrands(data))
@@ -19,6 +21,7 @@ const Shop = observer(() => {
     fetchDevice().then((data) => {
       device.setDevices(data.rows)
       device.setTotalCount(data.count)
+      setIsLoading(false)
     })
   }, [])
 
@@ -31,8 +34,11 @@ const Shop = observer(() => {
     ).then((data) => {
       device.setDevices(data.rows)
       device.setTotalCount(data.count)
+      setIsLoading(false)
     })
   }, [device.page, device.selectedBrand, device.selectedType])
+
+  if (isLoading) return <Spinner />
 
   return (
     <Container>

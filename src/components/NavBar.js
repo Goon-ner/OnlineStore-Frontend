@@ -7,6 +7,7 @@ import { NavLink, useNavigate } from 'react-router-dom'
 import { observer } from 'mobx-react-lite'
 import {
   ADMIN_ROUTE,
+  BASKET_ROUTE,
   LOGIN_ROUTE,
   MAIN_ROUTE,
   SHOP_ROUTE,
@@ -14,7 +15,7 @@ import {
 
 const NavBar = observer(() => {
   const navigate = useNavigate()
-  const { user } = useStore()
+  const { device, user } = useStore()
 
   const logOut = () => {
     user.setUser({})
@@ -41,7 +42,19 @@ const NavBar = observer(() => {
         </h3>
         <div>
           {user.isAuth ? (
-            <Nav className="ml-auto">
+            <Nav className="ml-auto fs-5">
+              {!device.basket[0] ? (
+                <Nav.Link onClick={() => navigate(BASKET_ROUTE)}>
+                  Корзина
+                </Nav.Link>
+              ) : (
+                <Nav.Link
+                  style={{ color: 'azure' }}
+                  onClick={() => navigate(BASKET_ROUTE)}
+                >
+                  Корзина({device.basket.length})
+                </Nav.Link>
+              )}
               <Nav.Link onClick={() => navigate(ADMIN_ROUTE)}>
                 Админ панель
               </Nav.Link>

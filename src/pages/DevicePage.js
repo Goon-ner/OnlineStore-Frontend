@@ -1,27 +1,35 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import Container from 'react-bootstrap/Container'
 import Col from 'react-bootstrap/Col'
 import Row from 'react-bootstrap/Row'
 import Image from 'react-bootstrap/Image'
+import Spinner from 'react-bootstrap/Spinner'
 import TypeBar from '../components/TypeBar'
 import star from '../assets/star.webp'
 import BrandBar from '../components/BrandBar'
 import Button from 'react-bootstrap/Button'
 import { useParams } from 'react-router-dom'
 import { fetchOneDevice, fetchBrands } from '../http/deviceAPI'
-import { useState } from 'react'
+import { useStore } from '../index'
 
 const DevicePage = () => {
-  const [brands, setBrands] = useState([])
-
-  const [oneDevice, setOneDevice] = useState({})
+  const { device } = useStore()
+  const [isLoading, setIsLoading] = useState(true)
   const { id } = useParams()
+
   useEffect(() => {
-    fetchBrands().then((data) => setBrands(data))
-    fetchOneDevice(id).then((data) => setOneDevice(data))
+    fetchBrands().then((data) => device.setBrands(data))
+    fetchOneDevice(id).then((data) => {
+      device.setDevices(data)
+      setIsLoading(false)
+    })
   }, [])
 
-  console.log(oneDevice)
+  const addBasket = () => {
+    device.setBasket([...device.basket, device.devices])
+  }
+
+  if (isLoading) return <Spinner />
 
   return (
     <Container className="d-flex">
@@ -35,29 +43,31 @@ const DevicePage = () => {
             <Col md={4}>
               <Image
                 className="w-100 p-2"
-                src={'http://localhost:5000/' + oneDevice.img}
+                src={'http://localhost:5000/' + device.devices.img}
               />
             </Col>
             <Col md={5}>
-              {brands.map((brand) => {
-                if (brand.id === oneDevice.brandId) return <h2>{brand.name}</h2>
+              {device.brands.map((brand) => {
+                if (brand.id === device.brandId) return <h2>{brand.name}</h2>
               })}
 
-              <h2>{oneDevice.name}</h2>
+              <h2>{device.devices.name}</h2>
               <div className="d-flex align-items-center">
-                <div>{oneDevice.rating}</div>
+                <div>{device.devices.rating}</div>
                 <Image width={20} height={20} src={star} />
               </div>
             </Col>
             <Col md={3} className="mt-5 text-center">
               <h3>Цена:</h3>
-              <h2>{oneDevice.price} USDT</h2>
-              <Button variant={'outline-danger'}>Добавить в корзину</Button>
+              <h2>{device.devices.price} Рублей</h2>
+              <Button onClick={() => addBasket()} variant={'outline-danger'}>
+                Добавить в корзину
+              </Button>
             </Col>
           </div>
           <Row className="d-flex flex-column">
             <h4>Характеристики:</h4>
-            {oneDevice.info.map((info, index) => (
+            {device.devices.info.map((info, index) => (
               <Row
                 key={info.id}
                 style={{
